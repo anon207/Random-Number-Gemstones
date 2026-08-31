@@ -1,4 +1,5 @@
 import random
+import sys
 
 # My first game (made by THE Mark Samuel)
 
@@ -28,6 +29,73 @@ import random
 # 20 | 24576001-50000000 -> Clear Quartz          -> $95         | 0.50848    | 50.848%
 
 def main():
-    print(random.randint(1,50000000))
+    #print(random.randint(1,50000000))
 
+    # gameplay loop spin numbers ->
+    # buy upgrades -> 
+    # spin better numbers ->
+    # specific button probably 's' will be used for spin 
+    # 'u' will probably be used for upgrades
+
+    gamemode = "spin"
+
+    while gamemode != "exit":
+            
+        # spin gameplay loop
+        while gamemode == "spin":
+            print("spin menu!!") # used for debugging
+            query = input()
+            if query == 'u':
+                gamemode = "upgrade"
+            elif query == "save":
+                pass # will eventually be save logic
+            elif query == 's':
+                print("You're already spinning twin.")
+            elif query == "exit":
+                gamemode = "exit"
+            elif query == "stats":
+                pass # print user stats
+            else:
+                print("Invalid command, valid commands are:")
+                print("stats -> prints user stats.")
+                print("u -> brings user to the upgrade menu.")
+                print("s -> brings user to the spin menu.")
+                print("save -> creates a save file that saves the state of the users game.")
+                print("exit -> exits the game, will ask user if they would like to save first.")
+
+        while gamemode == "upgrade":
+            print("upgrade menu!!") # used for debugging
+            query = input()
+            if query == 'u':
+                print("You're already upgrading twin.")
+            elif query == "save":
+                pass # will eventually be save logic
+            elif query == 's':
+                gamemode = "spin"
+            elif query == "exit":
+                gamemode = "exit"
+            elif query == "stats":
+                pass # print user stats
+            else:
+                print("Invalid command, valid commands are:")
+                print("stats -> prints user stats.")
+                print("u -> brings user to the upgrade menu.")
+                print("s -> brings user to the spin menu.")
+                print("save -> creates a save file that saves the state of the users game.")
+                print("exit -> exits the game, will ask user if they would like to save first.")
+
+        if gamemode == "exit":
+            print("Are you sure you want to quit? Y/N?")
+            while gamemode == "exit":
+                query = input()
+                if query == 'Y':
+                    gamemode = "quit"
+                elif query == 'N':
+                    gamemode = "spin"
+                else:
+                    print("Please answer either Y or N.")
+
+        if gamemode == "quit":
+            sys.exit()
+            
 main()
