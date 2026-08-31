@@ -28,72 +28,168 @@ import sys
 # 19 | 12288001-24576000 -> Natural Citrine       -> $190        | 0.24576    | 24.576%
 # 20 | 24576001-50000000 -> Clear Quartz          -> $95         | 0.50848    | 50.848%
 
+# maybe will work on adding modifiers to gemstones at some point?
+
+def general_command_logic(gamemode, query):
+    if query == "spin":
+        gamemode = "spin"
+    elif query == "upgrade":
+        gamemode == "upgrade"
+    elif query == "bag":
+        gamemode == "bag"
+    elif query == "stats":
+        gamemode = "stats"
+    elif query == "save":
+        pass # print user stats
+    elif query == "exit":
+            gamemode == "exit"
+    elif query == '?' and gamemode == "spin":
+        print("Valid commands are:")
+        print("s -> spins a gemstone")
+        print("a -> automates the process of spinning gemstones (must be bought from upgrades first)")
+    else:
+        print("Valid commands are:")
+        print("spin    -> brings user to the spin menu.")
+        print("upgrade -> brings user to the upgrade menu.")
+        print("bag     -> displays the users bag (or inventory), this is where gemstones can be sold or simply marveled at.") 
+        print("stats   -> prints user stats.")
+        print("save    -> creates a save file that saves the state of the users game.")
+        print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
+    return(gamemode)
+
+def spin():
+    num = random.randint(1,50000000)
+
+    if num > 0 and num <= 1:
+        # BLUE DIAMOND
+        print("You spun a Blue Diamond worth $50,000,000")
+    elif num > 1 and num <= 10:
+        # IMPERIAL JADEITE
+        print("You spun an Imperial Jadeite worth $25,000,000")
+    elif num > 10 and num <= 50:
+        # PINK DIAMOND
+        print("You spun a Pink Diamond worth $12,500,000")
+    elif num > 50 and num <= 500:
+        # RED DIAMOND
+        print("You spun a Red Diamond worth $6,250,000")
+    elif num > 500 and num <= 1500:
+        # BURMESE RUBY
+        print("You spun a Burmese Ruby worth $3,125,000")
+    elif num > 1500 and num <= 3000:
+        # ALEXANDRITE
+        print("You spun an Alexandrite worth $1,562,500")
+    elif num > 3000 and num <= 6000:
+        # MUSGRAVITE
+        print("You spun a Musgravite worth $781,250")
+    elif num > 6000 and num <= 12000:
+        # COLUMBIAN EMERALD
+        print("You spun a Columbian Emerald worth $390,625")
+    elif num > 12000 and num <= 24000:
+        # KASHMIR SAPPHIRE
+        print("You spun a Kashmir Sapphire worth $195,312")
+    elif num > 24000 and num <= 48000:
+        # RED BERYL
+        print("You spun a Red Beryl worth $97,656")
+    elif num > 48000 and num <= 96000:
+        # GRANDIDIERITE
+        print("You spun a Grandidierite worth $48,828")
+    elif num > 96000 and num <= 192000:
+        # PADPARADSCHA SAPPHIRE
+        print("You spun a Padparadscha Sapphire worth $24,414")
+    elif num > 192000 and num <= 384000:
+        # BLACK OPAL
+        print("You spun a Black Opal worth $12,207")
+    elif num > 384000 and num <= 768000:
+        # BENITOITE
+        print("You spun a Benitoite worth $6,103")
+    elif num > 768000 and num <= 1536000:
+        # TANZANITE
+        print("You spun a Tanzanite worth $3,051")
+    elif num > 1536000 and num <= 3072000:
+        # AQUAMARINE
+        print("You spun an Aquamarine worth $1,525")
+    elif num > 3072000 and num <= 6144000:
+        # TOPAZ
+        print("You spun a Topaz worth $762")
+    elif num > 6144000 and num <= 12288000:
+        # AMETHYST
+        print("You spun a Amethyst worth $381")
+    elif num > 12288000 and num <= 24576000:
+        # NATURAL CITRINE
+        print("You spun a Natural Citrine worth $190")
+    else:
+        # CLEAR QUARTZ
+        print("You spun a Clear Quartz worth $95")
+
+
+def spin_logic(gamemode, automate): # will eventually need to pass stats tuple, bag tuple, etc.
+    while gamemode == "spin":
+
+        query = input()
+        if query == 's':
+            spin()
+        elif query == 'a' and automate:
+            print("Automation!")
+            pass #automate()
+        elif query == 'a' and not(automate):
+            print("Automation not unlocked yet!")
+        else:
+            general_command_logic(gamemode, query)
+
+def exit_logic(gamemode):
+    print("Are you sure you want to quit? Y/N?")
+    while gamemode == "exit":
+        query = input()
+        if query == 'Y':
+            gamemode = "quit"
+        elif query == 'N':
+            gamemode = "spin"
+        else:
+            print("Please answer either Y or N.")
+    return gamemode
+
 def main():
-    #print(random.randint(1,50000000))
 
-    # gameplay loop spin numbers ->
-    # buy upgrades -> 
-    # spin better numbers ->
-    # specific button probably 's' will be used for spin 
-    # 'u' will probably be used for upgrades
+    gamemode = "start"
+    automate = False
 
-    gamemode = "spin"
-
-    while gamemode != "exit":
+    while True:
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GAME MODE LOGIC ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+        if gamemode == "start":
+            print("Welcome to Random Number Gemstones!")
+            print("This is a probability based game where you will improve incrementally.")
+            print("You will start by 'spinning' for gemstones, upon recieving them you will be able to sell them for cash.")
+            print("Using the cash gained by selling gemstones, you can purchase upgrades that will allow you to not only spin")
+            print("better gemstones but spin more efficiently and even automate the process.")
+            print("Here is a list of all the commands you can use within the game and what they do:")
+            print("spin    -> brings user to the spin menu.")
+            print("upgrade -> brings user to the upgrade menu.")
+            print("bag     -> displays the users bag (or inventory), this is where gemstones can be sold or simply marveled at.") 
+            print("stats   -> prints user stats.")
+            print("save    -> creates a save file that saves the state of the users game.")
+            print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
+            print("Your 'gamemode' will now be set to 'spin', type s and then click enter to spin for your very first gemstone!")
+            print("P.S if you ever get stuck simply type ? and hit enter and you should be pointed in the right direction.")
+            gamemode = "spin"
             
-        # spin gameplay loop
-        while gamemode == "spin":
-            print("spin menu!!") # used for debugging
-            query = input()
-            if query == 'u':
-                gamemode = "upgrade"
-            elif query == "save":
-                pass # will eventually be save logic
-            elif query == 's':
-                print("You're already spinning twin.")
-            elif query == "exit":
-                gamemode = "exit"
-            elif query == "stats":
-                pass # print user stats
-            else:
-                print("Invalid command, valid commands are:")
-                print("stats -> prints user stats.")
-                print("u -> brings user to the upgrade menu.")
-                print("s -> brings user to the spin menu.")
-                print("save -> creates a save file that saves the state of the users game.")
-                print("exit -> exits the game, will ask user if they would like to save first.")
+        if gamemode == "spin":
+            spin_logic(gamemode, automate)
 
-        while gamemode == "upgrade":
-            print("upgrade menu!!") # used for debugging
-            query = input()
-            if query == 'u':
-                print("You're already upgrading twin.")
-            elif query == "save":
-                pass # will eventually be save logic
-            elif query == 's':
-                gamemode = "spin"
-            elif query == "exit":
-                gamemode = "exit"
-            elif query == "stats":
-                pass # print user stats
-            else:
-                print("Invalid command, valid commands are:")
-                print("stats -> prints user stats.")
-                print("u -> brings user to the upgrade menu.")
-                print("s -> brings user to the spin menu.")
-                print("save -> creates a save file that saves the state of the users game.")
-                print("exit -> exits the game, will ask user if they would like to save first.")
+        if gamemode == "upgrade":
+            pass
+
+        if gamemode == "bag":
+            pass
+
+        if gamemode == "stats":
+            pass
+
+        if gamemode == "save":
+            pass
 
         if gamemode == "exit":
             print("Are you sure you want to quit? Y/N?")
-            while gamemode == "exit":
-                query = input()
-                if query == 'Y':
-                    gamemode = "quit"
-                elif query == 'N':
-                    gamemode = "spin"
-                else:
-                    print("Please answer either Y or N.")
+            exit_logic(gamemode)
 
         if gamemode == "quit":
             sys.exit()
