@@ -57,77 +57,81 @@ def general_command_logic(gamemode, query):
         print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
     return(gamemode)
 
-def spin():
+def spin(gemstone_values):
     num = random.randint(1,50000000)
+    gem = None
 
     if num > 0 and num <= 1:
         # BLUE DIAMOND
-        print("You spun a Blue Diamond worth $50,000,000")
+        gem = "blue_diamond"
     elif num > 1 and num <= 10:
         # IMPERIAL JADEITE
-        print("You spun an Imperial Jadeite worth $25,000,000")
+        gem = "imperial_jadeite"
     elif num > 10 and num <= 50:
         # PINK DIAMOND
-        print("You spun a Pink Diamond worth $12,500,000")
+        gem = "pink_diamond"
     elif num > 50 and num <= 500:
         # RED DIAMOND
-        print("You spun a Red Diamond worth $6,250,000")
+        gem = "red_diamond"
     elif num > 500 and num <= 1500:
         # BURMESE RUBY
-        print("You spun a Burmese Ruby worth $3,125,000")
+        gem = "burmese_ruby"
     elif num > 1500 and num <= 3000:
         # ALEXANDRITE
-        print("You spun an Alexandrite worth $1,562,500")
+        gem = "alexandrite"
     elif num > 3000 and num <= 6000:
         # MUSGRAVITE
-        print("You spun a Musgravite worth $781,250")
+        gem = "musgravite"
     elif num > 6000 and num <= 12000:
         # COLUMBIAN EMERALD
-        print("You spun a Columbian Emerald worth $390,625")
+        gem = "columbian_emerald"
     elif num > 12000 and num <= 24000:
         # KASHMIR SAPPHIRE
-        print("You spun a Kashmir Sapphire worth $195,312")
+        gem = "kashmir_sapphire"
     elif num > 24000 and num <= 48000:
         # RED BERYL
-        print("You spun a Red Beryl worth $97,656")
+        gem = "red_beryl"
     elif num > 48000 and num <= 96000:
         # GRANDIDIERITE
-        print("You spun a Grandidierite worth $48,828")
+        gem = "grandidierite"
     elif num > 96000 and num <= 192000:
         # PADPARADSCHA SAPPHIRE
-        print("You spun a Padparadscha Sapphire worth $24,414")
+        gem = "padparadscha_sapphire"
     elif num > 192000 and num <= 384000:
         # BLACK OPAL
-        print("You spun a Black Opal worth $12,207")
+        gem = "black_opal"
     elif num > 384000 and num <= 768000:
         # BENITOITE
-        print("You spun a Benitoite worth $6,103")
+        gem = "benitoite"
     elif num > 768000 and num <= 1536000:
         # TANZANITE
-        print("You spun a Tanzanite worth $3,051")
+        gem = "tanzanite"
     elif num > 1536000 and num <= 3072000:
         # AQUAMARINE
-        print("You spun an Aquamarine worth $1,525")
+        gem = "aquamarine"
     elif num > 3072000 and num <= 6144000:
         # TOPAZ
-        print("You spun a Topaz worth $762")
+        gem = "topaz"
     elif num > 6144000 and num <= 12288000:
         # AMETHYST
-        print("You spun a Amethyst worth $381")
+        gem = "amethyst"
     elif num > 12288000 and num <= 24576000:
         # NATURAL CITRINE
-        print("You spun a Natural Citrine worth $190")
+        gem = "natural_citrine"
     else:
         # CLEAR QUARTZ
-        print("You spun a Clear Quartz worth $95")
+        gem = "clear_quartz"
+
+    print("You spun a(n)", gemstone_values[gem]["name"], "worth", gemstone_values[gem]["val"])
+    #money += gemstone_values[gem]["val"]
 
 
-def spin_logic(gamemode, automate): # will eventually need to pass stats tuple, bag tuple, etc.
+def spin_logic(gamemode, automate, gemstone_values): # will eventually need to pass stats tuple, bag tuple, etc.
     while gamemode == "spin":
 
         query = input()
         if query == 's':
-            spin()
+            spin(gemstone_values)
         elif query == 'a' and automate:
             print("Automation!")
             pass #automate()
@@ -150,8 +154,39 @@ def exit_logic(gamemode):
 
 def main():
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GAME VARIABLES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     gamemode = "start"
     automate = False
+    money = 0
+    total_spins = 0
+    luck_mult = 1
+    modifier_mult = 1
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GEMSTONE VALUES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    gemstone_values = {
+    "blue_diamond": {"name": "Blue Diamond", "val": 50000000},
+    "imperial_jadeite": {"name": "Imperial Jadeite", "val": 25000000},
+    "pink_diamond": {"name": "Pink Diamond", "val": 12500000},
+    "red_diamond": {"name": "Red Diamond", "val": 6250000},
+    "burmese_ruby": {"name": "Burmese Ruby", "val": 3125000},
+    "alexandrite": {"name": "Alexandrite", "val": 1562500},
+    "musgravite": {"name": "Musgravite", "val": 781250},
+    "columbian_emerald": {"name": "Columbian Emerald", "val": 390625},
+    "kashmir_sapphire": {"name": "Kashmir Sapphire", "val": 195312},
+    "red_beryl": {"name": "Red Beryl", "val": 97656},
+    "grandidierite": {"name": "Grandidierite", "val": 48828},
+    "padparadscha_sapphire": {"name": "Padparadscha Sapphire", "val": 24414},
+    "black_opal": {"name": "Black Opal", "val": 12207},
+    "benitoite": {"name": "Benitoite", "val": 6103},
+    "tanzanite": {"name": "Tanzanite", "val": 3051},
+    "aquamarine": {"name": "Aquamarine", "val": 1525},
+    "topaz": {"name": "Topaz", "val": 762},
+    "amethyst": {"name": "Amethyst", "val": 381},
+    "natural_citrine": {"name": "Natural Citrine", "val": 190},
+    "clear_quartz": {"name": "Clear Quartz", "val": 95}
+    }
+    
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MODIFIER VALUES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     while True:
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GAME MODE LOGIC ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -173,7 +208,7 @@ def main():
             gamemode = "spin"
             
         if gamemode == "spin":
-            spin_logic(gamemode, automate)
+            spin_logic(gamemode, automate, gemstone_values)
 
         if gamemode == "upgrade":
             pass
