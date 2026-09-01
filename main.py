@@ -28,6 +28,30 @@ import sys
 # 19 | 12288001-24576000 -> Natural Citrine       -> $190        | 0.24576    | 24.576%
 # 20 | 24576001-50000000 -> Clear Quartz          -> $95         | 0.50848    | 50.848%
 
+# Additionally have a 1 in 500 chance to roll a multiplier with one of the following probabilities: 
+
+#    |    range    ||   modifier   || mult. | decimal | probability
+#-------------------------------------------------------------------------------------------
+# 1  | 1           -> Transcendent -> x1000 | 0.00002 | 0.002%
+# 2  | 2-5         -> Eternal      -> x400  | 0.00008 | 0.008%
+# 3  | 6-15        -> Mythic       -> x300  | 0.0002  | 0.02%
+# 4  | 16-30       -> Celestial    -> x200  | 0.0003  | 0.03%
+# 5  | 31-60       -> Divine       -> x100  | 0.0006  | 0.06%
+# 6  | 61-110      -> Immortal     -> x90   | 0.001   | 0.1%
+# 7  | 111-180     -> Anomalous    -> x80   | 0.0014  | 0.14%
+# 8  | 181-330     -> Radiant      -> x70   | 0.003   | 0.3%
+# 9  | 331-630     -> Gilded       -> x60   | 0.006   | 0.6%
+# 10 | 631-1200    -> Tempest      -> x50   | 0.0114  | 1.14%
+# 11 | 1201-2000   -> Glitched     -> x30   | 0.016   | 1.6%
+# 12 | 2001-3000   -> Corrupted    -> x25   | 0.02    | 2%
+# 13 | 3001-4500   -> Astral       -> x20   | 0.03    | 3%
+# 14 | 4501-6500   -> Cataclysmic  -> x15   | 0.04    | 4%
+# 15 | 6501-10500  -> Phantom      -> x10   | 0.08    | 8%
+# 16 | 10501-16000 -> Quantum      -> x6    | 0.11    | 11%
+# 17 | 16001-24000 -> Volcanic     -> x5    | 0.16    | 16%
+# 18 | 24001-34000 -> Overclocked  -> x4    | 0.2     | 20%
+# 19 | 34001-50000 -> Luminous     -> x3    | 0.32    | 32%
+
 # maybe will work on adding modifiers to gemstones at some point?
 
 def general_command_logic(gamemode, query):
@@ -57,8 +81,77 @@ def general_command_logic(gamemode, query):
         print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
     return(gamemode)
 
-def spin(gemstone_values):
-    num = random.randint(1,50000000)
+def mult_spin(mult_chance, mult_luck):
+    num = random.randint(1,500) * mult_chance
+    mult = None
+
+    if num == 1:
+
+        mult_num = random.randint(1,50000) * mult_luck
+
+        if 0 < mult_num <= 1:
+            # TRANSCENDENT
+            mult = "transcendent"
+        elif mult_num <= 5:
+            # ETERNAL
+            mult = "eternal"
+        elif mult_num <= 15:
+            # MYTHIC
+            mult = "mythic"
+        elif mult_num <= 30:
+            # CELESTIAL
+            mult = "celestial"
+        elif mult_num <= 60:
+            # DIVINE
+            mult = "divine"
+        elif mult_num <= 110:
+            # IMMORTAL
+            mult = "immortal"
+        elif mult_num <= 180:
+            # ANOMALOUS
+            mult = "anomalous"
+        elif mult_num <= 330:
+            # RADIANT
+            mult = "radiant"
+        elif mult_num <= 630:
+            # GILDED
+            mult = "gilded"
+        elif mult_num <= 1200:
+            # TEMPEST
+            mult = "tempest"
+        elif mult_num <= 2000:
+            # GLITCHED
+            mult = "glitched"
+        elif mult_num <= 3000:
+            # CORRUPTED
+            mult = "corrupted"
+        elif mult_num <= 4500:
+            # ASTRAL
+            mult = "astral"
+        elif mult_num <= 6500:
+            # CATACLYSMIC
+            mult = "cataclysmic"
+        elif mult_num <= 10500:
+            # PHANTOM
+            mult = "phantom"
+        elif mult_num <= 16000:
+            # QUANTUM
+            mult = "quantum"
+        elif mult_num <= 24000:
+            # VOLCANIC
+            mult = "volcanic"
+        elif mult_num <= 34000:
+            # OVERCLOCKED
+            mult = "overclocked"
+        elif mult_num <= 50000:
+            # LUMINOUS
+            mult = "luminous"
+
+    return (mult)
+
+def spin(gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values):
+    num = random.randint(1,50000000) * spin_luck
+    mult = mult_spin(mult_chance, mult_luck)
     gem = None
 
     if num > 0 and num <= 1:
@@ -122,16 +215,19 @@ def spin(gemstone_values):
         # CLEAR QUARTZ
         gem = "clear_quartz"
 
-    print("You spun a(n)", gemstone_values[gem]["name"], "worth", gemstone_values[gem]["val"])
+    if mult is None:
+        print("You spun a(n)", gemstone_values[gem]["name"], "worth", gemstone_values[gem]["val"])
+    else:
+        print("You spun a(n)", modifier_values[mult]["name"], gemstone_values[gem]["name"], "worth", gemstone_values[gem]["val"] * modifier_values[mult]["val"])
     #money += gemstone_values[gem]["val"]
 
 
-def spin_logic(gamemode, automate, gemstone_values): # will eventually need to pass stats tuple, bag tuple, etc.
+def spin_logic(gamemode, automate, gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values): # will eventually need to pass stats tuple, bag tuple, etc.
     while gamemode == "spin":
 
         query = input()
         if query == 's':
-            spin(gemstone_values)
+            spin(gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values)
         elif query == 'a' and automate:
             print("Automation!")
             pass #automate()
@@ -157,10 +253,14 @@ def main():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GAME VARIABLES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     gamemode = "start"
     automate = False
+
     money = 0
     total_spins = 0
-    luck_mult = 1
-    modifier_mult = 1
+
+    mult_chance = 1
+    mult_luck = 1
+
+    spin_luck = 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GEMSTONE VALUES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     gemstone_values = {
@@ -187,6 +287,27 @@ def main():
     }
     
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MODIFIER VALUES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    modifier_values = {
+        "transcendent": {"name": "Transcendent", "val": 1000},
+        "eternal": {"name": "Eternal", "val": 400},
+        "mythic": {"name": "Mythic", "val": 300},
+        "celestial": {"name": "Celestial", "val": 200},
+        "divine": {"name": "Divine", "val": 100},
+        "immortal": {"name": "Immortal", "val": 90},
+        "anomalous": {"name": "Anomalous", "val": 80},
+        "radiant": {"name": "Radiant", "val": 70},
+        "gilded": {"name": "Gilded", "val": 60},
+        "tempest": {"name": "Tempest", "val": 50},
+        "glitched": {"name": "Glitched", "val": 30},
+        "corrupted": {"name": "Corrupted", "val": 25},
+        "astral": {"name": "Astral", "val": 20},
+        "cataclysmic": {"name": "Cataclysmic", "val": 15},
+        "phantom": {"name": "Phantom", "val": 10},
+        "quantum": {"name": "Quantum", "val": 6},
+        "volcanic": {"name": "Volcanic", "val": 5},
+        "overclocked": {"name": "Overclocked", "val": 4},
+        "luminous": {"name": "Luminous", "val": 3}
+    }
 
     while True:
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GAME MODE LOGIC ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -208,7 +329,7 @@ def main():
             gamemode = "spin"
             
         if gamemode == "spin":
-            spin_logic(gamemode, automate, gemstone_values)
+            spin_logic(gamemode, automate, gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values)
 
         if gamemode == "upgrade":
             pass
