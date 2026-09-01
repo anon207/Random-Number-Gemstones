@@ -1,5 +1,8 @@
 import random
 import sys
+from colorama import Fore, Style, init
+
+init(autoreset=True)
 
 # My first game (made by THE Mark Samuel)
 
@@ -154,61 +157,61 @@ def spin(gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values):
     mult = mult_spin(mult_chance, mult_luck)
     gem = None
 
-    if num > 0 and num <= 1:
+    if 0 < num <= 1:
         # BLUE DIAMOND
         gem = "blue_diamond"
-    elif num > 1 and num <= 10:
+    elif num <= 10:
         # IMPERIAL JADEITE
         gem = "imperial_jadeite"
-    elif num > 10 and num <= 50:
+    elif num <= 50:
         # PINK DIAMOND
         gem = "pink_diamond"
-    elif num > 50 and num <= 500:
+    elif num <= 500:
         # RED DIAMOND
         gem = "red_diamond"
-    elif num > 500 and num <= 1500:
+    elif num <= 1500:
         # BURMESE RUBY
         gem = "burmese_ruby"
-    elif num > 1500 and num <= 3000:
+    elif num <= 3000:
         # ALEXANDRITE
         gem = "alexandrite"
-    elif num > 3000 and num <= 6000:
+    elif num <= 6000:
         # MUSGRAVITE
         gem = "musgravite"
-    elif num > 6000 and num <= 12000:
+    elif num <= 12000:
         # COLUMBIAN EMERALD
         gem = "columbian_emerald"
-    elif num > 12000 and num <= 24000:
+    elif num <= 24000:
         # KASHMIR SAPPHIRE
         gem = "kashmir_sapphire"
-    elif num > 24000 and num <= 48000:
+    elif num <= 48000:
         # RED BERYL
         gem = "red_beryl"
-    elif num > 48000 and num <= 96000:
+    elif num <= 96000:
         # GRANDIDIERITE
         gem = "grandidierite"
-    elif num > 96000 and num <= 192000:
+    elif num <= 192000:
         # PADPARADSCHA SAPPHIRE
         gem = "padparadscha_sapphire"
-    elif num > 192000 and num <= 384000:
+    elif num <= 384000:
         # BLACK OPAL
         gem = "black_opal"
-    elif num > 384000 and num <= 768000:
+    elif num <= 768000:
         # BENITOITE
         gem = "benitoite"
-    elif num > 768000 and num <= 1536000:
+    elif num <= 1536000:
         # TANZANITE
         gem = "tanzanite"
-    elif num > 1536000 and num <= 3072000:
+    elif num <= 3072000:
         # AQUAMARINE
         gem = "aquamarine"
-    elif num > 3072000 and num <= 6144000:
+    elif num <= 6144000:
         # TOPAZ
         gem = "topaz"
-    elif num > 6144000 and num <= 12288000:
+    elif num <= 12288000:
         # AMETHYST
         gem = "amethyst"
-    elif num > 12288000 and num <= 24576000:
+    elif num <= 24576000:
         # NATURAL CITRINE
         gem = "natural_citrine"
     else:
@@ -216,7 +219,10 @@ def spin(gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values):
         gem = "clear_quartz"
 
     if mult is None:
-        print("You spun a(n)", gemstone_values[gem]["name"], "worth", gemstone_values[gem]["val"])
+        print(
+            f"You spun a(n) {gemstone_values[gem]['col']}{gemstone_values[gem]['name']}{Style.RESET_ALL} "
+            f"worth {Fore.GREEN}${gemstone_values[gem]['val']:,}"
+        )
     else:
         print("You spun a(n)", modifier_values[mult]["name"], gemstone_values[gem]["name"], "worth", gemstone_values[gem]["val"] * modifier_values[mult]["val"])
     #money += gemstone_values[gem]["val"]
@@ -264,26 +270,26 @@ def main():
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GEMSTONE VALUES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     gemstone_values = {
-    "blue_diamond": {"name": "Blue Diamond", "val": 50000000},
-    "imperial_jadeite": {"name": "Imperial Jadeite", "val": 25000000},
-    "pink_diamond": {"name": "Pink Diamond", "val": 12500000},
-    "red_diamond": {"name": "Red Diamond", "val": 6250000},
-    "burmese_ruby": {"name": "Burmese Ruby", "val": 3125000},
-    "alexandrite": {"name": "Alexandrite", "val": 1562500},
-    "musgravite": {"name": "Musgravite", "val": 781250},
-    "columbian_emerald": {"name": "Columbian Emerald", "val": 390625},
-    "kashmir_sapphire": {"name": "Kashmir Sapphire", "val": 195312},
-    "red_beryl": {"name": "Red Beryl", "val": 97656},
-    "grandidierite": {"name": "Grandidierite", "val": 48828},
-    "padparadscha_sapphire": {"name": "Padparadscha Sapphire", "val": 24414},
-    "black_opal": {"name": "Black Opal", "val": 12207},
-    "benitoite": {"name": "Benitoite", "val": 6103},
-    "tanzanite": {"name": "Tanzanite", "val": 3051},
-    "aquamarine": {"name": "Aquamarine", "val": 1525},
-    "topaz": {"name": "Topaz", "val": 762},
-    "amethyst": {"name": "Amethyst", "val": 381},
-    "natural_citrine": {"name": "Natural Citrine", "val": 190},
-    "clear_quartz": {"name": "Clear Quartz", "val": 95}
+    "blue_diamond": {"name": "Blue Diamond", "val": 50000000, "col": Fore.BLUE + Style.BRIGHT},
+    "imperial_jadeite": {"name": "Imperial Jadeite", "val": 25000000, "col": Fore.GREEN + Style.BRIGHT},
+    "pink_diamond": {"name": "Pink Diamond", "val": 12500000, "col": Fore.MAGENTA + Style.BRIGHT},
+    "red_diamond": {"name": "Red Diamond", "val": 6250000, "col": Fore.RED + Style.BRIGHT},
+    "burmese_ruby": {"name": "Burmese Ruby", "val": 3125000, "col": Fore.RED + Style.BRIGHT},
+    "alexandrite": {"name": "Alexandrite", "val": 1562500, "col": Fore.MAGENTA},
+    "musgravite": {"name": "Musgravite", "val": 781250, "col": Fore.BLACK + Style.BRIGHT},
+    "columbian_emerald": {"name": "Columbian Emerald", "val": 390625, "col": Fore.GREEN + Style.BRIGHT},
+    "kashmir_sapphire": {"name": "Kashmir Sapphire", "val": 195312, "col": Fore.BLUE + Style.BRIGHT},
+    "red_beryl": {"name": "Red Beryl", "val": 97656, "col": Fore.RED},
+    "grandidierite": {"name": "Grandidierite", "val": 48828, "col": Fore.CYAN},
+    "padparadscha_sapphire": {"name": "Padparadscha Sapphire", "val": 24414, "col": Fore.RED + Style.BRIGHT},
+    "black_opal": {"name": "Black Opal", "val": 12207, "col": Fore.BLACK + Style.BRIGHT},
+    "benitoite": {"name": "Benitoite", "val": 6103, "col": Fore.BLUE},
+    "tanzanite": {"name": "Tanzanite", "val": 3051, "col": Fore.BLUE},
+    "aquamarine": {"name": "Aquamarine", "val": 1525, "col": Fore.CYAN + Style.BRIGHT},
+    "topaz": {"name": "Topaz", "val": 762, "col": Fore.YELLOW},
+    "amethyst": {"name": "Amethyst", "val": 381, "col": Fore.MAGENTA},
+    "natural_citrine": {"name": "Natural Citrine", "val": 190, "col": Fore.YELLOW + Style.BRIGHT},
+    "clear_quartz": {"name": "Clear Quartz", "val": 95, "col": Fore.WHITE + Style.BRIGHT}
     }
     
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MODIFIER VALUES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
