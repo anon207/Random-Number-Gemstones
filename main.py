@@ -75,6 +75,7 @@ def print_inventory(player, gemstone_values, modifier_values):
         return
         
     for (gem_id, modifier_id), quantity in player.bag.items():
+
         # Get standard gemstone name and color
         gem_name = gemstone_values[gem_id]['name']
         gem_col = gemstone_values[gem_id]['col']
@@ -109,6 +110,7 @@ def general_command_logic(game_state, query, player):
     elif query == "exit":
             game_state["gamemode"] = "exit"
     elif query == '?' and game_state["gamemode"] == "spin":
+        # SPIN HELP
         print("Valid commands within the spin gamemode:")
         print("s       -> spins a gemstone")
         print("a       -> automates the process of spinning gemstones (must be bought from upgrades first)")
@@ -118,7 +120,8 @@ def general_command_logic(game_state, query, player):
         print("stats   -> prints user stats.")
         print("save    -> creates a save file that saves the state of the users game.")
         print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
-    elif query == '?' and game_state["gamemode"] == "spin":
+    elif query == '?' and game_state["gamemode"] == "bag":
+        # BAG HELP
         print("Valid commands within the bag gamemode:")
         print("b       -> prints the contents of users bag")
         print("spin    -> brings user to the spin menu.")
@@ -296,17 +299,17 @@ def spin_logic(game_state, automate, gemstone_values, player, modifier_values): 
         else:
             general_command_logic(game_state, query, player)
 
-def exit_logic(gamemode):
+def exit_logic(game_state):
     print("Are you sure you want to quit? Y/N?")
-    while gamemode == "exit":
+    while game_state["gamemode"] == "exit":
         query = input()
         if query == 'Y':
-            gamemode = "quit"
+            game_state["gamemode"] = "quit"
         elif query == 'N':
-            gamemode = "spin"
+            print("Okay, setting your gamemode back to spin!")
+            game_state["gamemode"] = "spin"
         else:
             print("Please answer either Y or N.")
-    return gamemode
 
 def bag_logic(game_state, player, gemstone_values, modifier_values):
     while game_state["gamemode"] == "bag":
@@ -439,7 +442,6 @@ def main():
             pass
 
         if game_state["gamemode"] == "exit":
-            print("Are you sure you want to quit? Y/N?")
             exit_logic(game_state)
 
         if game_state["gamemode"] == "quit":
