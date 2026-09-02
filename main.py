@@ -67,14 +67,42 @@ def stripe_text(text, color1, color2):
             
     return striped_result + Style.RESET_ALL
 
-def print_inventory(player, gemstone_values, modifier_values):
+def rainbow_text(text):
+
+    colors = [
+        Fore.LIGHTRED_EX,
+        Fore.LIGHTYELLOW_EX,
+        Fore.LIGHTGREEN_EX,
+        Fore.LIGHTBLUE_EX,
+        Fore.LIGHTMAGENTA_EX
+    ]
+    
+    striped_result = ""
+
+    for index, char in enumerate(text):
+
+        if char == " ":
+            striped_result += char
+            continue
+            
+
+        color = colors[index % len(colors)]
+        striped_result += f"{color}{Style.BRIGHT}{char}"
+
+    return striped_result + Style.RESET_ALL
+
+def print_inventory_quantity(player, gemstone_values, modifier_values, flag):
     print(f"\n{Style.BRIGHT}=== YOUR GEM BAG ===")
     
     if not player.bag:
         print("Your bag is empty!")
         return
         
-    for (gem_id, modifier_id), quantity in player.bag.items():
+    for (gem_id, modifier_id), quantity in sorted(
+        player.bag.items(),
+        key=lambda item: item[1],
+        reverse=flag
+        ):
 
         # Get standard gemstone name and color
         gem_name = gemstone_values[gem_id]['name']
@@ -87,7 +115,54 @@ def print_inventory(player, gemstone_values, modifier_values):
         else:
             full_display = f"{gem_col}{gem_name}{Style.RESET_ALL}"
             
-        print(f"• {full_display} x{quantity}")
+        print(f"- {full_display} x{quantity}")
+    print("====================\n")
+
+def get_bag_item_value(item, gemstone_values, modifier_values, single):
+    (gem_id, modifier_id), quantity = item
+
+    value = gemstone_values[gem_id]['val']
+
+    if modifier_id is not None:
+        value *= modifier_values[modifier_id]['val']
+
+    if single:
+        final_value = value
+    else:
+        final_value = (value * quantity)
+
+    return (final_value)
+
+def print_inventory_value(player, gemstone_values, modifier_values, flag, single):
+    print(f"\n{Style.BRIGHT}=== YOUR GEM BAG ===")
+    
+    if not player.bag:
+        print("Your bag is empty!")
+        return
+        
+    for (gem_id, modifier_id), quantity in sorted(
+        player.bag.items(),
+        key=lambda item: get_bag_item_value(
+            item,
+            gemstone_values,
+            modifier_values,
+            single
+        ),
+        reverse=flag
+    ):
+
+        # Get standard gemstone name and color
+        gem_name = gemstone_values[gem_id]['name']
+        gem_col = gemstone_values[gem_id]['col']
+        
+        # Check if there is a modifier to append
+        if modifier_id is not None:
+            mod_name = modifier_values[modifier_id]['name']
+            full_display = f"{mod_name} {gem_col}{gem_name}{Style.RESET_ALL}"
+        else:
+            full_display = f"{gem_col}{gem_name}{Style.RESET_ALL}"
+            
+        print(f"- {full_display} x{quantity}")
     print("====================\n")
 
 def general_command_logic(game_state, query, player):
@@ -100,7 +175,7 @@ def general_command_logic(game_state, query, player):
     elif query == "stats":
         print("Money: ", player.money)
         print("Total spins: ", player.total_spins)
-        print("Best spin: ", player.best_spin)
+        print(f"Best spin:  {player.best_spin} worth {Fore.GREEN}${player.best_spin_cost:,}")
         print("Mult chance: ", player.mult_chance)
         print("Mult luck: ", player.mult_luck)
         print("Spin luck: ", player.spin_luck)
@@ -111,25 +186,34 @@ def general_command_logic(game_state, query, player):
             game_state["gamemode"] = "exit"
     elif query == '?' and game_state["gamemode"] == "spin":
         # SPIN HELP
-        print("Valid commands within the spin gamemode:")
-        print("s       -> spins a gemstone")
-        print("a       -> automates the process of spinning gemstones (must be bought from upgrades first)")
-        print("spin    -> brings user to the spin menu.")
-        print("upgrade -> brings user to the upgrade menu.")
-        print("bag     -> brings user to their bag, this is where gemstones can be sold or simply marveled at.") 
-        print("stats   -> prints user stats.")
-        print("save    -> creates a save file that saves the state of the users game.")
-        print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
+        print(f"\n{rainbow_text("*******************************************************************************************************")}")
+        print(f"{Fore.LIGHTYELLOW_EX}*{Style.RESET_ALL}   Valid commands within the {Fore.LIGHTMAGENTA_EX}spin{Style.RESET_ALL} gamemode:                                                          {Fore.LIGHTBLUE_EX}*{Style.RESET_ALL}")
+        print(f"{Fore.LIGHTGREEN_EX}*{Style.RESET_ALL}   {Fore.LIGHTRED_EX}s{Style.RESET_ALL}       -> {Fore.LIGHTMAGENTA_EX}spins{Style.RESET_ALL} a gemstone                                                                       {Fore.LIGHTMAGENTA_EX}*{Style.RESET_ALL}")
+        print(f"{Fore.LIGHTBLUE_EX}*{Style.RESET_ALL}   {Fore.LIGHTBLUE_EX}a{Style.RESET_ALL}       -> {Fore.YELLOW}automates{Style.RESET_ALL} the process of spinning gemstones (must be bought from {Fore.BLACK}upgrades{Style.RESET_ALL} first)       {Fore.LIGHTRED_EX}*{Style.RESET_ALL}")
+        print(f"{Fore.LIGHTMAGENTA_EX}*{Style.RESET_ALL}   {Fore.MAGENTA}spin{Style.RESET_ALL}    -> brings user to the {Fore.MAGENTA}spin{Style.RESET_ALL} menu.                                                          {Fore.LIGHTYELLOW_EX}*{Style.RESET_ALL}")
+        print(f"{Fore.LIGHTRED_EX}*{Style.RESET_ALL}   {Fore.BLACK}upgrade{Style.RESET_ALL} -> brings user to the {Fore.BLACK}upgrade{Style.RESET_ALL} menu.                                                       {Fore.LIGHTGREEN_EX}*{Style.RESET_ALL}")
+        print(f"{Fore.LIGHTYELLOW_EX}*{Style.RESET_ALL}   {Fore.GREEN}bag{Style.RESET_ALL}     -> brings user to their {Fore.GREEN}bag{Style.RESET_ALL}, this is where gemstones can be sold or simply marveled at.   {Fore.LIGHTBLUE_EX}*{Style.RESET_ALL}") 
+        print(f"{Fore.LIGHTGREEN_EX}*{Style.RESET_ALL}   {Fore.RED}stats{Style.RESET_ALL}   -> prints user {Fore.RED}stats{Style.RESET_ALL}.                                                                     {Fore.LIGHTMAGENTA_EX}*{Style.RESET_ALL}")
+        print(f"{Fore.LIGHTBLUE_EX}*{Style.RESET_ALL}   {Fore.YELLOW}save{Style.RESET_ALL}    -> creates a {Fore.YELLOW}save{Style.RESET_ALL} file that {Fore.YELLOW}saves{Style.RESET_ALL} the state of the users game.                            {Fore.LIGHTRED_EX}*{Style.RESET_ALL}")
+        print(f"{Fore.LIGHTMAGENTA_EX}*{Style.RESET_ALL}   {Fore.BLUE}exit{Style.RESET_ALL}    -> {Fore.BLUE}exits{Style.RESET_ALL} the game, will ask user if they are sure they want to {Fore.BLACK}quit{Style.RESET_ALL} first.                {Fore.LIGHTYELLOW_EX}*{Style.RESET_ALL}")
+        print(f"{rainbow_text("*******************************************************************************************************")}\n")
     elif query == '?' and game_state["gamemode"] == "bag":
         # BAG HELP
-        print("Valid commands within the bag gamemode:")
-        print("b       -> prints the contents of users bag")
-        print("spin    -> brings user to the spin menu.")
-        print("upgrade -> brings user to the upgrade menu.")
-        print("bag     -> brings user to their bag, this is where gemstones can be sold or simply marveled at.") 
-        print("stats   -> prints user stats.")
-        print("save    -> creates a save file that saves the state of the users game.")
-        print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
+        print(f"\n{rainbow_text("************************************************************************************************************************************************")}")
+        print(f"*   Valid commands within the {Fore.LIGHTGREEN_EX}bag{Style.RESET_ALL} gamemode:                                                                                                    *")
+        print(f"*   {Fore.LIGHTRED_EX}bq{Style.RESET_ALL}      -> prints bag contents in order of quantity from most to least held {Fore.LIGHTRED_EX}(bq => bag quantity){Style.RESET_ALL}                                           *")
+        print(f"*   {Fore.LIGHTMAGENTA_EX}bqr{Style.RESET_ALL}     -> prints bag contents in order of quantity from least to most held {Fore.LIGHTMAGENTA_EX}(bqr => bag quantity reverse){Style.RESET_ALL}                                  *")
+        print(f"*   {Fore.LIGHTBLUE_EX}bv{Style.RESET_ALL}      -> prints bag contents in order of individual gemstone value from most to least expensive {Fore.LIGHTBLUE_EX}(bv => bag value){Style.RESET_ALL}                        *")
+        print(f"*   {Fore.LIGHTCYAN_EX}bvr{Style.RESET_ALL}     -> prints bag contents in order of individual gemstone value from least to most expensive {Fore.LIGHTCYAN_EX}(bvr => bag value reverse){Style.RESET_ALL}               *")
+        print(f"*   {Fore.LIGHTYELLOW_EX}bvc{Style.RESET_ALL}     -> prints bag contents in order of cumulative gemstone value from most to least expensive {Fore.LIGHTYELLOW_EX}(bvc => bag value cumulative){Style.RESET_ALL}            *")
+        print(f"*   {Fore.LIGHTBLACK_EX}bvcr{Style.RESET_ALL}    -> prints bag contents in order of cumulative gemstone value from least to most expensive {Fore.LIGHTBLACK_EX}(bvcr => bag value cumulative reverse){Style.RESET_ALL}   *")
+        print(f"*   {Fore.MAGENTA}spin{Style.RESET_ALL}    -> brings user to the {Fore.MAGENTA}spin{Style.RESET_ALL} menu.                                                                                                   *")
+        print(f"*   {Fore.BLACK}upgrade{Style.RESET_ALL} -> brings user to the {Fore.BLACK}upgrade{Style.RESET_ALL} menu.                                                                                                *")
+        print(f"*   {Fore.GREEN}bag{Style.RESET_ALL}     -> brings user to their {Fore.GREEN}bag{Style.RESET_ALL}, this is where gemstones can be sold or simply marveled at.                                            *") 
+        print(f"*   {Fore.RED}stats{Style.RESET_ALL}   -> prints user {Fore.RED}stats{Style.RESET_ALL}.                                                                                                              *")
+        print(f"*   {Fore.YELLOW}save{Style.RESET_ALL}    -> creates a {Fore.YELLOW}save{Style.RESET_ALL} file that {Fore.YELLOW}saves{Style.RESET_ALL} the state of the users game.                                                                     *")
+        print(f"*   {Fore.BLUE}exit{Style.RESET_ALL}    -> {Fore.BLUE}exits{Style.RESET_ALL} the game, will ask user if they are sure they want to {Fore.BLACK}quit{Style.RESET_ALL} first.                                                         *")
+        print(f"{rainbow_text("************************************************************************************************************************************************")}\n")
     else:
         print("type ? for help")
 
@@ -285,7 +369,11 @@ def spin(gemstone_values, player, modifier_values):
 
     player.total_spins += 1
 
-def spin_logic(game_state, automate, gemstone_values, player, modifier_values): # will eventually need to pass stats tuple, bag tuple, etc.
+    if player.best_spin_cost <= final_value:
+        player.best_spin = display_name
+        player.best_spin_cost = final_value
+
+def spin_logic(game_state, automate, gemstone_values, player, modifier_values):
     while game_state["gamemode"] == "spin":
 
         query = input()
@@ -315,8 +403,28 @@ def bag_logic(game_state, player, gemstone_values, modifier_values):
     while game_state["gamemode"] == "bag":
     
         query = input()
-        if query == 'b':
-            print_inventory(player, gemstone_values, modifier_values)
+        if query == 'bq': # sorts by quantity from most to least held
+            flag = True
+            print_inventory_quantity(player, gemstone_values, modifier_values, flag)
+        elif query == 'bv': # sorts by individual gemstone value from most expensive to least expensive
+            flag = True
+            single = True
+            print_inventory_value(player, gemstone_values, modifier_values, flag, single)
+        elif query == 'bqr': # sorts by quantity from least to most held
+            flag = False
+            print_inventory_quantity(player, gemstone_values, modifier_values, flag)
+        elif query == 'bvr': # sorts by individual gemstone value from least expensive to most expensive
+            flag = False
+            single = True
+            print_inventory_value(player, gemstone_values, modifier_values, flag, single)
+        elif query == 'bvc': # sorts by cumulative gemstone value from most expensive to least expensive
+            flag = True
+            single = False
+            print_inventory_value(player, gemstone_values, modifier_values, flag, single)
+        elif query == 'bvcr': # sorts by cumulative gemstone value from least expensive to most expensive
+            flag = False
+            single = False
+            print_inventory_value(player, gemstone_values, modifier_values, flag, single)
         else:
             general_command_logic(game_state, query, player)
 
@@ -334,6 +442,7 @@ def main():
         money: int = 0
         total_spins: int = 0
         best_spin: str = "N/A"
+        best_spin_cost: int = 0
         mult_chance: float = 1.0
         mult_luck: float = 1.0
         spin_luck: float = 1.0
@@ -410,23 +519,34 @@ def main():
         "luminous": {"name": luminous_text, "val": 3}
     }
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  UNIQUE  TEXT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    welcome_msg = rainbow_text("Welcome to Random Number Gemstones!!!")
+    stars_msg = rainbow_text("*********************************************************************************************************************")
+    probability_msg = stripe_text("probability", Fore.LIGHTBLUE_EX, Fore.LIGHTRED_EX)
+    game_msg = rainbow_text("game")
+    gamemode_msg = stripe_text("'gamemode'", Fore.MAGENTA, Fore.LIGHTRED_EX)
+    gemstone_msg = rainbow_text("gemstone")
+
     while True:
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GAME MODE LOGIC ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
         if game_state["gamemode"] == "start":
-            print("Welcome to Random Number Gemstones!")
-            print("This is a probability based game where you will improve incrementally.")
-            print("You will start by 'spinning' for gemstones, upon recieving them you will be able to sell them for cash.")
-            print("Using the cash gained by selling gemstones, you can purchase upgrades that will allow you to not only spin")
-            print("better gemstones but spin more efficiently and even automate the process.")
-            print("Here is a list of all the commands you can use within the game and what they do:")
-            print("spin    -> brings user to the spin menu.")
-            print("upgrade -> brings user to the upgrade menu.")
-            print("bag     -> brings user to their bag, this is where gemstones can be sold or simply marveled at.") 
-            print("stats   -> prints user stats.")
-            print("save    -> creates a save file that saves the state of the users game.")
-            print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
-            print("Your 'gamemode' will now be set to 'spin', type s and then click enter to spin for your very first gemstone!")
-            print("P.S if you ever get stuck simply type ? and hit enter and you should be pointed in the right direction.")
+            print(f"\n{stars_msg}")
+            print(f"{Fore.LIGHTYELLOW_EX}*{Style.RESET_ALL}   {welcome_msg}                                                                           {Fore.LIGHTGREEN_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTGREEN_EX}*{Style.RESET_ALL}   This is a {probability_msg} based game where you will improve incrementally.                                          {Fore.LIGHTBLUE_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTBLUE_EX}*{Style.RESET_ALL}   You will start by {Fore.LIGHTMAGENTA_EX}'spinning'{Style.RESET_ALL} for gemstones, upon recieving them you will be able to sell them for {Fore.LIGHTGREEN_EX}cash{Style.RESET_ALL}.         {Fore.LIGHTMAGENTA_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTMAGENTA_EX}*{Style.RESET_ALL}   Using the {Fore.LIGHTGREEN_EX}cash{Style.RESET_ALL} gained by selling gemstones, you can purchase {Fore.LIGHTBLACK_EX}upgrades{Style.RESET_ALL} that will allow you to not only spin      {Fore.LIGHTRED_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTRED_EX}*{Style.RESET_ALL}   better gemstones but spin more efficiently and even {Fore.LIGHTYELLOW_EX}automate{Style.RESET_ALL} the process.                                       {Fore.LIGHTYELLOW_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTYELLOW_EX}*{Style.RESET_ALL}   Here is a list of all the commands you can use within the {game_msg} and what they do:                                {Fore.LIGHTGREEN_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTGREEN_EX}*{Style.RESET_ALL}   {Fore.MAGENTA}spin{Style.RESET_ALL}    -> brings user to the {Fore.MAGENTA}spin{Style.RESET_ALL} menu.                                                                        {Fore.LIGHTBLUE_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTBLUE_EX}*{Style.RESET_ALL}   {Fore.BLACK}upgrade{Style.RESET_ALL} -> brings user to the {Fore.BLACK}upgrade{Style.RESET_ALL} menu.                                                                     {Fore.LIGHTMAGENTA_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTMAGENTA_EX}*{Style.RESET_ALL}   {Fore.GREEN}bag{Style.RESET_ALL}     -> brings user to their {Fore.GREEN}bag{Style.RESET_ALL}, this is where gemstones can be sold or simply marveled at.                 {Fore.LIGHTRED_EX}*{Style.RESET_ALL}") 
+            print(f"{Fore.LIGHTRED_EX}*{Style.RESET_ALL}   {Fore.RED}stats{Style.RESET_ALL}   -> prints user {Fore.RED}stats{Style.RESET_ALL}.                                                                                   {Fore.LIGHTYELLOW_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTYELLOW_EX}*{Style.RESET_ALL}   {Fore.YELLOW}save{Style.RESET_ALL}    -> creates a {Fore.YELLOW}save{Style.RESET_ALL} file that {Fore.YELLOW}saves{Style.RESET_ALL} the state of the users game.                                          {Fore.LIGHTGREEN_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTGREEN_EX}*{Style.RESET_ALL}   {Fore.BLUE}exit{Style.RESET_ALL}    -> {Fore.BLUE}exits{Style.RESET_ALL} the game, will ask user if they are sure they want to {Fore.BLACK}quit{Style.RESET_ALL} first.                              {Fore.LIGHTBLUE_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTBLUE_EX}*{Style.RESET_ALL}   Your {gamemode_msg} will now be set to {Fore.MAGENTA}'spin'{Style.RESET_ALL}, type {Fore.MAGENTA}s{Style.RESET_ALL} and then click enter to spin for your very first {gemstone_msg}!    {Fore.LIGHTMAGENTA_EX}*{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTMAGENTA_EX}*{Style.RESET_ALL}   {Fore.CYAN}P.S{Style.RESET_ALL} if you ever get {Fore.BLACK}stuck{Style.RESET_ALL} simply type {Fore.GREEN}?{Style.RESET_ALL} and hit {Fore.CYAN}enter{Style.RESET_ALL} and you should be pointed in the right direction.         {Fore.LIGHTRED_EX}*{Style.RESET_ALL}")
+            print(f"{stars_msg}\n")
             game_state["gamemode"] = "spin"
             
         if game_state["gamemode"] == "spin":
