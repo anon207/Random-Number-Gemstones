@@ -1,6 +1,7 @@
 import random
 import sys
 from colorama import Fore, Style, init
+from dataclasses import dataclass, field
 
 init(autoreset=True)
 
@@ -55,8 +56,6 @@ init(autoreset=True)
 # 18 | 24001-34000 -> Overclocked  -> x4    | 0.2     | 20%
 # 19 | 34001-50000 -> Luminous     -> x3    | 0.32    | 32%
 
-# maybe will work on adding modifiers to gemstones at some point?
-
 def stripe_text(text, color1, color2):
     striped_result = ""
     
@@ -68,32 +67,68 @@ def stripe_text(text, color1, color2):
             
     return striped_result + Style.RESET_ALL
 
-def general_command_logic(gamemode, query):
+def print_inventory(player, gemstone_values, modifier_values):
+    print(f"\n{Style.BRIGHT}=== YOUR GEM BAG ===")
+    
+    if not player.bag:
+        print("Your bag is empty!")
+        return
+        
+    for (gem_id, modifier_id), quantity in player.bag.items():
+        # Get standard gemstone name and color
+        gem_name = gemstone_values[gem_id]['name']
+        gem_col = gemstone_values[gem_id]['col']
+        
+        # Check if there is a modifier to append
+        if modifier_id is not None:
+            mod_name = modifier_values[modifier_id]['name']
+            full_display = f"{mod_name} {gem_col}{gem_name}{Style.RESET_ALL}"
+        else:
+            full_display = f"{gem_col}{gem_name}{Style.RESET_ALL}"
+            
+        print(f"• {full_display} x{quantity}")
+    print("====================\n")
+
+def general_command_logic(game_state, query, player):
     if query == "spin":
-        gamemode = "spin"
+        game_state["gamemode"] = "spin"
     elif query == "upgrade":
-        gamemode == "upgrade"
+        game_state["gamemode"] = "upgrade"
     elif query == "bag":
-        gamemode == "bag"
+        game_state["gamemode"] = "bag"
     elif query == "stats":
-        gamemode = "stats"
+        print("Money: ", player.money)
+        print("Total spins: ", player.total_spins)
+        print("Best spin: ", player.best_spin)
+        print("Mult chance: ", player.mult_chance)
+        print("Mult luck: ", player.mult_luck)
+        print("Spin luck: ", player.spin_luck)
     elif query == "save":
-        pass # print user stats
+        #game_state["gamemode"] = "save"
+        pass
     elif query == "exit":
-            gamemode == "exit"
-    elif query == '?' and gamemode == "spin":
-        print("Valid commands are:")
-        print("s -> spins a gemstone")
-        print("a -> automates the process of spinning gemstones (must be bought from upgrades first)")
-    else:
-        print("Valid commands are:")
+            game_state["gamemode"] = "exit"
+    elif query == '?' and game_state["gamemode"] == "spin":
+        print("Valid commands within the spin gamemode:")
+        print("s       -> spins a gemstone")
+        print("a       -> automates the process of spinning gemstones (must be bought from upgrades first)")
         print("spin    -> brings user to the spin menu.")
         print("upgrade -> brings user to the upgrade menu.")
-        print("bag     -> displays the users bag (or inventory), this is where gemstones can be sold or simply marveled at.") 
+        print("bag     -> brings user to their bag, this is where gemstones can be sold or simply marveled at.") 
         print("stats   -> prints user stats.")
         print("save    -> creates a save file that saves the state of the users game.")
         print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
-    return(gamemode)
+    elif query == '?' and game_state["gamemode"] == "spin":
+        print("Valid commands within the bag gamemode:")
+        print("b       -> prints the contents of users bag")
+        print("spin    -> brings user to the spin menu.")
+        print("upgrade -> brings user to the upgrade menu.")
+        print("bag     -> brings user to their bag, this is where gemstones can be sold or simply marveled at.") 
+        print("stats   -> prints user stats.")
+        print("save    -> creates a save file that saves the state of the users game.")
+        print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
+    else:
+        print("type ? for help")
 
 def mult_spin(mult_chance, mult_luck):
     num = random.randint(1,500) * mult_chance
@@ -163,9 +198,9 @@ def mult_spin(mult_chance, mult_luck):
 
     return (mult)
 
-def spin(gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values):
-    num = random.randint(1,50000000) * spin_luck
-    mult = mult_spin(mult_chance, mult_luck)
+def spin(gemstone_values, player, modifier_values):
+    num = random.randint(1,50000000) * player.spin_luck
+    mult = mult_spin(player.mult_chance, player.mult_luck)
     gem = None
 
     if 0 < num <= 1:
@@ -230,33 +265,36 @@ def spin(gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values):
         gem = "clear_quartz"
 
     if mult is None:
-        print(
-            f"You spun a(n) {gemstone_values[gem]['col']}{gemstone_values[gem]['name']}{Style.RESET_ALL} "
-            f"worth {Fore.GREEN}${gemstone_values[gem]['val']:,}"
-        )
+        final_value = gemstone_values[gem]['val']
+        display_name = f"{gemstone_values[gem]['col']}{gemstone_values[gem]['name']}{Style.RESET_ALL}"
     else:
-        print(
-            f"You spun a(n) {modifier_values[mult]['name']} {gemstone_values[gem]['col']}{gemstone_values[gem]['name']}{Style.RESET_ALL} "
-            f"worth {Fore.GREEN}${gemstone_values[gem]['val'] * modifier_values[mult]['val']:,}"
-        )
+        final_value = gemstone_values[gem]['val'] * modifier_values[mult]['val']
+        display_name = f"{modifier_values[mult]['name']} {gemstone_values[gem]['col']}{gemstone_values[gem]['name']}{Style.RESET_ALL}"
 
+    print(f"You spun a(n) {display_name} worth {Fore.GREEN}${final_value:,}")
 
-    #money += gemstone_values[gem]["val"]
+    bag_key = (gem, mult)
 
+    if bag_key in player.bag:
+        player.bag[bag_key] += 1
+    else:
+        player.bag[bag_key] = 1 
 
-def spin_logic(gamemode, automate, gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values): # will eventually need to pass stats tuple, bag tuple, etc.
-    while gamemode == "spin":
+    player.total_spins += 1
+
+def spin_logic(game_state, automate, gemstone_values, player, modifier_values): # will eventually need to pass stats tuple, bag tuple, etc.
+    while game_state["gamemode"] == "spin":
 
         query = input()
         if query == 's':
-            spin(gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values)
+            spin(gemstone_values, player, modifier_values)
         elif query == 'a' and automate:
             print("Automation!")
             pass #automate()
         elif query == 'a' and not(automate):
             print("Automation not unlocked yet!")
         else:
-            general_command_logic(gamemode, query)
+            general_command_logic(game_state, query, player)
 
 def exit_logic(gamemode):
     print("Are you sure you want to quit? Y/N?")
@@ -270,20 +308,35 @@ def exit_logic(gamemode):
             print("Please answer either Y or N.")
     return gamemode
 
+def bag_logic(game_state, player, gemstone_values, modifier_values):
+    while game_state["gamemode"] == "bag":
+    
+        query = input()
+        if query == 'b':
+            print_inventory(player, gemstone_values, modifier_values)
+        else:
+            general_command_logic(game_state, query, player)
+
 def main():
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GAME VARIABLES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    gamemode = "start"
+    game_state = {
+        "gamemode": "start"
+    }
     automate = False
 
-    money = 0
-    total_spins = 0
-    best_spin = "N/A"
+    # STATS
+    @dataclass
+    class PlayerStats:
+        money: int = 0
+        total_spins: int = 0
+        best_spin: str = "N/A"
+        mult_chance: float = 1.0
+        mult_luck: float = 1.0
+        spin_luck: float = 1.0
+        bag: dict = field(default_factory=dict)
 
-    mult_chance = 1
-    mult_luck = 1
-
-    spin_luck = 1
+    player = PlayerStats()
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GEMSTONE VALUES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     gemstone_values = {
@@ -356,7 +409,7 @@ def main():
 
     while True:
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GAME MODE LOGIC ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-        if gamemode == "start":
+        if game_state["gamemode"] == "start":
             print("Welcome to Random Number Gemstones!")
             print("This is a probability based game where you will improve incrementally.")
             print("You will start by 'spinning' for gemstones, upon recieving them you will be able to sell them for cash.")
@@ -365,34 +418,31 @@ def main():
             print("Here is a list of all the commands you can use within the game and what they do:")
             print("spin    -> brings user to the spin menu.")
             print("upgrade -> brings user to the upgrade menu.")
-            print("bag     -> displays the users bag (or inventory), this is where gemstones can be sold or simply marveled at.") 
+            print("bag     -> brings user to their bag, this is where gemstones can be sold or simply marveled at.") 
             print("stats   -> prints user stats.")
             print("save    -> creates a save file that saves the state of the users game.")
             print("exit    -> exits the game, will ask user if they are sure they want to quit first.")
             print("Your 'gamemode' will now be set to 'spin', type s and then click enter to spin for your very first gemstone!")
             print("P.S if you ever get stuck simply type ? and hit enter and you should be pointed in the right direction.")
-            gamemode = "spin"
+            game_state["gamemode"] = "spin"
             
-        if gamemode == "spin":
-            spin_logic(gamemode, automate, gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values)
+        if game_state["gamemode"] == "spin":
+            spin_logic(game_state, automate, gemstone_values, player, modifier_values)
 
-        if gamemode == "upgrade":
+        if game_state["gamemode"] == "upgrade":
             pass
 
-        if gamemode == "bag":
+        if game_state["gamemode"] == "bag":
+            bag_logic(game_state, player, gemstone_values, modifier_values)
+
+        if game_state["gamemode"] == "save":
             pass
 
-        if gamemode == "stats":
-            pass
-
-        if gamemode == "save":
-            pass
-
-        if gamemode == "exit":
+        if game_state["gamemode"] == "exit":
             print("Are you sure you want to quit? Y/N?")
-            exit_logic(gamemode)
+            exit_logic(game_state)
 
-        if gamemode == "quit":
+        if game_state["gamemode"] == "quit":
             sys.exit()
             
 main()
