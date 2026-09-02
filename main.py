@@ -57,6 +57,17 @@ init(autoreset=True)
 
 # maybe will work on adding modifiers to gemstones at some point?
 
+def stripe_text(text, color1, color2):
+    striped_result = ""
+    
+    for index, char in enumerate(text):
+        if index % 2 == 0:
+            striped_result += f"{color1}{char}"
+        else:
+            striped_result += f"{color2}{char}"
+            
+    return striped_result + Style.RESET_ALL
+
 def general_command_logic(gamemode, query):
     if query == "spin":
         gamemode = "spin"
@@ -224,7 +235,12 @@ def spin(gemstone_values, mult_chance, mult_luck, spin_luck, modifier_values):
             f"worth {Fore.GREEN}${gemstone_values[gem]['val']:,}"
         )
     else:
-        print("You spun a(n)", modifier_values[mult]["name"], gemstone_values[gem]["name"], "worth", gemstone_values[gem]["val"] * modifier_values[mult]["val"])
+        print(
+            f"You spun a(n) {modifier_values[mult]['name']} {gemstone_values[gem]['col']}{gemstone_values[gem]['name']}{Style.RESET_ALL} "
+            f"worth {Fore.GREEN}${gemstone_values[gem]['val'] * modifier_values[mult]['val']:,}"
+        )
+
+
     #money += gemstone_values[gem]["val"]
 
 
@@ -262,6 +278,7 @@ def main():
 
     money = 0
     total_spins = 0
+    best_spin = "N/A"
 
     mult_chance = 1
     mult_luck = 1
@@ -291,28 +308,50 @@ def main():
     "natural_citrine": {"name": "Natural Citrine", "val": 190, "col": Fore.YELLOW + Style.BRIGHT},
     "clear_quartz": {"name": "Clear Quartz", "val": 95, "col": Fore.WHITE + Style.BRIGHT}
     }
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MODIFIER COLORS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
+    transcendent_text = stripe_text("Transcendent", Fore.CYAN + Style.BRIGHT, Fore.WHITE + Style.BRIGHT)
+    eternal_text = stripe_text("Eternal", Fore.YELLOW + Style.BRIGHT, Fore.WHITE + Style.BRIGHT)
+    mythic_text = stripe_text("Mythic", Fore.RED + Style.BRIGHT, Fore.BLACK + Style.BRIGHT)
+    celestial_text = stripe_text("Celestial", Fore.CYAN + Style.BRIGHT, Fore.MAGENTA + Style.BRIGHT)
+    divine_text = stripe_text("Divine", Fore.WHITE + Style.BRIGHT, Fore.BLUE + Style.BRIGHT)
+    immortal_text = stripe_text("Immortal", Fore.MAGENTA, Fore.RED + Style.BRIGHT)
+    anomalous_text = stripe_text("Anomalous", Fore.GREEN, Fore.BLACK + Style.BRIGHT)
+    radiant_text = stripe_text("Radiant", Fore.YELLOW + Style.BRIGHT, Fore.MAGENTA)
+    gilded_text = stripe_text("Gilded", Fore.YELLOW, Fore.GREEN + Style.BRIGHT)
+    tempest_text = stripe_text("Tempest", Fore.CYAN, Fore.BLUE + Style.BRIGHT)
+    glitched_text = stripe_text("Glitched", Fore.BLACK, Fore.WHITE + Style.BRIGHT)
+    corrupted_text = stripe_text("Corrupted", Fore.BLUE, Fore.RED + Style.BRIGHT)
+    astral_text = stripe_text("Astral", Fore.CYAN, Fore.GREEN + Style.BRIGHT)
+    cataclysmic_text = stripe_text("Cataclysmic", Fore.RED, Fore.YELLOW + Style.BRIGHT)
+    phantom_text = stripe_text("Phantom", Fore.BLACK + Style.BRIGHT, Fore.MAGENTA)
+    quantum_text = stripe_text("Quantum", Fore.MAGENTA, Fore.WHITE + Style.BRIGHT)
+    volcanic_text = stripe_text("Volcanic", Fore.RED + Style.BRIGHT, Fore.MAGENTA)
+    overclocked_text = stripe_text("Overclocked", Fore.BLUE, Fore.YELLOW + Style.BRIGHT)
+    luminous_text = stripe_text("Luminous", Fore.GREEN, Fore.WHITE + Style.BRIGHT)
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MODIFIER VALUES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     modifier_values = {
-        "transcendent": {"name": "Transcendent", "val": 1000},
-        "eternal": {"name": "Eternal", "val": 400},
-        "mythic": {"name": "Mythic", "val": 300},
-        "celestial": {"name": "Celestial", "val": 200},
-        "divine": {"name": "Divine", "val": 100},
-        "immortal": {"name": "Immortal", "val": 90},
-        "anomalous": {"name": "Anomalous", "val": 80},
-        "radiant": {"name": "Radiant", "val": 70},
-        "gilded": {"name": "Gilded", "val": 60},
-        "tempest": {"name": "Tempest", "val": 50},
-        "glitched": {"name": "Glitched", "val": 30},
-        "corrupted": {"name": "Corrupted", "val": 25},
-        "astral": {"name": "Astral", "val": 20},
-        "cataclysmic": {"name": "Cataclysmic", "val": 15},
-        "phantom": {"name": "Phantom", "val": 10},
-        "quantum": {"name": "Quantum", "val": 6},
-        "volcanic": {"name": "Volcanic", "val": 5},
-        "overclocked": {"name": "Overclocked", "val": 4},
-        "luminous": {"name": "Luminous", "val": 3}
+        "transcendent": {"name": transcendent_text, "val": 1000},
+        "eternal": {"name": eternal_text, "val": 400},
+        "mythic": {"name": mythic_text, "val": 300},
+        "celestial": {"name": celestial_text, "val": 200},
+        "divine": {"name": divine_text, "val": 100},
+        "immortal": {"name": immortal_text, "val": 90},
+        "anomalous": {"name": anomalous_text, "val": 80},
+        "radiant": {"name": radiant_text, "val": 70},
+        "gilded": {"name": gilded_text, "val": 60},
+        "tempest": {"name": tempest_text, "val": 50},
+        "glitched": {"name": glitched_text, "val": 30},
+        "corrupted": {"name": corrupted_text, "val": 25},
+        "astral": {"name": astral_text, "val": 20},
+        "cataclysmic": {"name": cataclysmic_text, "val": 15},
+        "phantom": {"name": phantom_text, "val": 10},
+        "quantum": {"name": quantum_text, "val": 6},
+        "volcanic": {"name": volcanic_text, "val": 5},
+        "overclocked": {"name": overclocked_text, "val": 4},
+        "luminous": {"name": luminous_text, "val": 3}
     }
 
     while True:
